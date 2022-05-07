@@ -1,0 +1,5 @@
+<kmodule xmlns="http://www.drools.org/xsd/kmodule">
+    <kbase name="stock" packages="com.droolsinaction.stock" eventProcessingMode="stream">
+        <ksession name="stockKS" />
+    </kbase>
+</kmodule>

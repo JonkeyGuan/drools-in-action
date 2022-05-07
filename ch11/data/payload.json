@@ -1,0 +1,37 @@
+{
+    "lookup": "default-ksession",
+    "commands": [
+      {
+        "insert": {
+          "object": {
+            "com.droolsinaction.loanapplication.Applicant": {
+              "creditScore":410,
+              "name":"Jonkey Guan",
+              "age":40,
+              "yearlyIncome":90000
+            }
+          },
+          "out-identifier":"applicant"
+        }
+      },
+      {
+        "insert": {
+          "object": {
+            "com.droolsinaction.loanapplication.Loan": {
+              "amount":250000,
+              "duration":10
+            }
+          },
+          "out-identifier":"loan"
+        }
+      },
+      {
+        "start-process" : {
+          "processId" : "LoanApplication.LoanApplication",
+          "parameter" : [ ],
+          "out-identifier" : null
+        }
+      }
+    ]
+  }
+  

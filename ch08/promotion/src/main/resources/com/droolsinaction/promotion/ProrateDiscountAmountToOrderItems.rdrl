@@ -1,0 +1,14 @@
+package com.droolsinaction.promotion;
+
+import java.lang.Number;
+
+rule "ProrateDiscountAmountToOrderItems"
+	dialect "mvel"
+	when
+		order : Order( amount > 0.0 , discountAmount > 0.0 )
+		orderItem : OrderItem( amount > 0.0 )
+	then
+		modify( orderItem ) {
+				setDiscountAmount( Math.ceil(orderItem.getAmount() / order.getAmount() * order.getDiscountAmount()  * 100) / 100 )
+		}
+end

@@ -1,0 +1,14 @@
+package com.droolsinaction.promotion;
+
+import java.lang.Number;
+
+rule "CalculateOrderDiscountAmount"
+	dialect "mvel"
+	when
+		order : Order( discountAmount <= 0.0 , amount > 0.0 )
+		discount : Discount( )
+	then
+		modify( order ) {
+				setDiscountAmount( order.getAmount() * (1 - discount.getRate()) )
+		}
+end

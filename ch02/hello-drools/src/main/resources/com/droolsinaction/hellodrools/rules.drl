@@ -1,0 +1,8 @@
+package com.droolsinaction.hellodrools;
+
+rule "hello drools"
+when
+	$message: String()
+then
+	System.out.println($message);
+end

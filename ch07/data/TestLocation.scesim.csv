@@ -1,0 +1,5 @@
+"#",Scenario description,GIVEN,GIVEN,GIVEN,EXPECT,EXPECT,EXPECT
+"#",Scenario description,String,Query,Query,QueryResult,QueryResult,QueryResult
+"#",Scenario description,expression </>,item,location,query.item,query.location,result
+1,在,"# String.valueOf(""bootstrap"")",钥匙,房子,钥匙,房子,在
+2,不在,"# String.valueOf(""bootstrap"")",笔记本,房子,笔记本,房子,不在

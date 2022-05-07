@@ -1,0 +1,15 @@
+package com.droolsinaction.promotion;
+
+import java.lang.Number;
+
+rule "CalculateOrderItemAmount"
+	dialect "mvel"
+	when
+		order : Order( )
+		orderItem : OrderItem( orderId == order.id , amount <= 0.0 )
+		product : Product( sku == orderItem.sku )
+	then
+		modify( orderItem ) {
+				setAmount( product.getPrice() * orderItem.getQuant() )
+		}
+end

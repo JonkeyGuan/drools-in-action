@@ -1,0 +1,15 @@
+package com.droolsinaction.loanapplication;
+
+import java.lang.Number;
+
+rule "EligibilityApplicantTooYoung"
+	dialect "mvel"
+	ruleflow-group "eligibility"
+	when
+		有一个贷款申请
+		申请人的年龄小于 18 岁
+	then
+		申请人不符合贷款资格
+		贷款被拒绝, 原因是: "年龄低于可贷款年龄范围"
+		日志输出规则名称
+end

@@ -1,0 +1,29 @@
+package com.droolsinaction.loanapplication;
+
+rule "Setting default values on Applicant"
+	dialect "mvel"
+	ruleflow-group "initialization"
+	no-loop true
+	when
+	    applicant : Applicant( )
+	then
+	    System.out.println("Rule fired : [" + drools.getRule().getName()+"]");
+	    modify(applicant) {
+	        setEligible( true ),
+	        setMonthlyIncome (applicant.getYearlyIncome()/12)
+	    }
+	    update(applicant);
+end
+
+rule "Setting default values on Loan"
+	dialect "mvel"
+	ruleflow-group "initialisation-rules"
+	no-loop true
+	when
+	    loan : Loan( )
+	then
+	    System.out.println("Rule fired : [" + drools.getRule().getName()+"]");
+	    modify(loan) {
+	        setApproved( false )
+	    }
+end

@@ -1,0 +1,128 @@
+package com.droolsinaction.expressfeeprarate;
+
+declare TotalWorkHours
+  month : String
+  hours : double
+end
+
+declare TotalProfitWorkHoursRate
+  month : String
+  rate : double
+end
+
+declare DepartmentDetail
+  month : String
+  name : String
+  rateOfAll : double
+  rateOfProfit : double
+  fee : double
+  revenue : double
+end
+
+declare ChannelRevenueRate
+  month : String
+  name : String
+  department : String
+  rate : double
+end
+
+rule "计算总工时"
+when
+    not TotalWorkHours()
+    ExpressFee($month: month)
+    $totalHours : Number(doubleValue() > 0.0) from accumulate (WorkHours(month == $month, $hours: hours), sum($hours)) 
+then
+    TotalWorkHours totalWorkHours = new TotalWorkHours($month, $totalHours.doubleValue());
+    insert(totalWorkHours);
+    System.out.println("[" + drools.getRule().getName()+"] " + "总工时为: " + totalWorkHours.getHours());
+end
+
+rule "计算各部门工时比例"
+when
+    ExpressFee($month: month)
+    $twh: TotalWorkHours(month == $month)
+    $wh: WorkHours(month == $month, $department : department)
+    not DepartmentDetail(name == $department, rateOfAll <= 0.0 )
+then
+    DepartmentDetail dd = new DepartmentDetail();
+    dd.setMonth($month);
+    dd.setName($department);
+    dd.setRateOfAll($wh.getHours()/$twh.getHours());
+    insert(dd);
+    System.out.println("[" + drools.getRule().getName() + "] " + dd.getName() + " 工时比例是: " + dd.getRateOfAll());
+end
+
+rule "汇总营收部门工时比例"
+when
+    ExpressFee($month: month)
+    not TotalProfitWorkHoursRate(month == $month)
+    $totalProfitWorkHourRate : Number( doubleValue() > 0.0 ) from 
+       accumulate (DepartmentDetail(month == $month, $rateOfAll : rateOfAll > 0.0, name != "行政"), sum($rateOfAll)) 
+then
+    TotalProfitWorkHoursRate tpwhr = new TotalProfitWorkHoursRate($month, $totalProfitWorkHourRate.doubleValue());
+    insert(tpwhr);
+    System.out.println("[" + drools.getRule().getName()+"] " + "营收部门的工时比例汇总为: " + tpwhr.getRate());    
+end
+
+rule "分摊非营收部门工时比例到每个营收部部门"
+when
+    ExpressFee($month: month)
+    TotalProfitWorkHoursRate(month == $month, $totalProfitWorkHourRate : rate)
+    DepartmentDetail(month == $month, name == "行政", $adminRateOfAll : rateOfAll)
+    $dd: DepartmentDetail(month == $month, rateOfProfit <= 0.0, name != "行政", $rateOfAll : rateOfAll)
+then
+    modify($dd) {
+        setRateOfProfit($rateOfAll + $adminRateOfAll * $rateOfAll / $totalProfitWorkHourRate);
+    }
+    System.out.println("[" + drools.getRule().getName() + "] " + $dd.getName() + " 分摊到的工时比例为: " + $dd.getRateOfProfit());
+end
+
+rule "分摊快递费用到每个营收部门"
+when
+    ExpressFee($month: month, $totalFee : amount)
+    $dd: DepartmentDetail(month == $month, $rateOfProfit : rateOfProfit > 0.0, name != "行政", fee <= 0.0)
+then
+    modify($dd) {
+        setFee($totalFee * $rateOfProfit);
+    }
+    System.out.println("[" + drools.getRule().getName() + "] " + $dd.getName() + " 分摊到的快递费用为: " + $dd.getFee());
+end
+
+rule "计算各营收部门的营业额"
+when
+    ExpressFee($month: month)
+    $r : Revenue(month == $month)
+    $dd: DepartmentDetail(month == $month, name == $r.department, revenue <= 0.0)
+    $totalAmount : Number( doubleValue() > 0.0 ) 
+        from accumulate (Revenue(month == $month, department == $r.department, $amount : amount), sum($amount)) 
+then
+    modify($dd) {
+        setRevenue($totalAmount);
+    }
+    System.out.println("[" + drools.getRule().getName()+"] " + $dd.getName() +  " 营业额为: " + $dd.getRevenue());
+end
+
+rule "计算各营收部门的每个营收渠道营业额占比"
+when
+    ExpressFee($month: month)
+    $dd: DepartmentDetail(month == $month, revenue > 0.0, $department : name)
+    $r: Revenue(month == $month, department == $department, $channel : channel)
+    not ChannelRevenueRate(month == $month, department == $department, rate <= 0.0)
+then
+    ChannelRevenueRate crr = new ChannelRevenueRate($month, $channel, $department, $r.getAmount() / $dd.getRevenue());
+    insert(crr);
+    System.out.println("[" + drools.getRule().getName() + "] " + crr.getName() + " " + crr.getDepartment() + " 占比是: " + crr.getRate());
+end
+
+rule "计算各营收部门的每个营收渠道分摊到的快递费用"
+when
+    ExpressFee($month: month)
+    $dd: DepartmentDetail(month == $month, $department : name, $fee : fee)
+    $r: Revenue(month == $month, department == $department, $channel : channel, fee <= 0.0)
+    $crr: ChannelRevenueRate(month == $month, department == $department, name == $channel, $rate : rate)
+then
+    modify($r) {
+        setFee(Math.ceil($fee * $rate * 100) / 100);
+    }
+    System.out.println("[" + drools.getRule().getName() + "] " + $r.getChannel() + " " + $r.getDepartment() + " 分摊到的快递费用为: " + $r.getFee());
+end

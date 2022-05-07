@@ -1,0 +1,40 @@
+package com.droolsinaction.location;
+
+dialect  "mvel"
+
+query isContainedIn( String item, String location )
+  Location( item, location; )
+  or
+  ( Location( x, location; ) and isContainedIn( item, x; ) )
+end
+
+rule bootstrap
+when
+	String()
+then
+	insert(new Location("客厅", "房子"));
+	insert(new Location("厨房", "房子"));
+	insert(new Location("米饭", "厨房"));
+	insert(new Location("西红柿", "厨房"));
+	insert(new Location("桌子", "客厅"));
+	insert(new Location("椅子", "客厅"));
+	insert(new Location("电脑", "桌子"));
+	insert(new Location("信封", "桌子"));
+	insert(new Location("钥匙", "信封"));
+end
+
+rule "the item is in the location"
+when
+	query: Query( item: item, location: location )
+	isContainedIn( item, location; )
+then
+	insert(new QueryResult(query, "在"));
+end
+
+rule "the item is not in the location"
+when
+	query: Query( item: item, location: location )
+	not isContainedIn( item, location; )
+then
+	insert(new QueryResult(query, "不在"));
+end

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_3" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.3">
+	<Header>
+		<Application name="JPMML-SkLearn" version="1.6.33"/>
+		<Timestamp>2021-11-08T04:31:48Z</Timestamp>
+	</Header>
+	<DataDictionary>
+		<DataField name="approval" optype="categorical" dataType="string">
+			<Value value="false"/>
+			<Value value="true"/>
+		</DataField>
+		<DataField name="category" optype="continuous" dataType="double"/>
+		<DataField name="urgency" optype="continuous" dataType="double"/>
+		<DataField name="targetPrice" optype="continuous" dataType="double"/>
+		<DataField name="price" optype="continuous" dataType="double"/>
+	</DataDictionary>
+	<RegressionModel modelName="approvalRegression" functionName="classification" algorithmName="sklearn.linear_model._logistic.LogisticRegression" normalizationMethod="logit">
+		<MiningSchema>
+			<MiningField name="approval" usageType="target"/>
+			<MiningField name="category"/>
+			<MiningField name="urgency"/>
+			<MiningField name="targetPrice"/>
+			<MiningField name="price"/>
+		</MiningSchema>
+		<Output>
+			<OutputField name="probability(false)" optype="continuous" dataType="double" feature="probability" value="false"/>
+			<OutputField name="probability(true)" optype="continuous" dataType="double" feature="probability" value="true"/>
+		</Output>
+		<RegressionTable intercept="-4.696960235968792" targetCategory="true">
+			<NumericPredictor name="category" coefficient="3.8191535499002662"/>
+			<NumericPredictor name="urgency" coefficient="2.4406125462303874"/>
+			<NumericPredictor name="targetPrice" coefficient="0.05032978497003101"/>
+			<NumericPredictor name="price" coefficient="-0.043652417913635555"/>
+		</RegressionTable>
+		<RegressionTable intercept="0.0" targetCategory="false"/>
+	</RegressionModel>
+</PMML>

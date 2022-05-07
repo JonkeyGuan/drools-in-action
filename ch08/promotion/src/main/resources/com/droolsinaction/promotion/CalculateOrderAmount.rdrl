@@ -1,0 +1,20 @@
+package com.droolsinaction.promotion;
+
+import java.lang.Number;
+
+rule "CalculateOrderAmount"
+	dialect "mvel"
+	when
+		order : Order( amount <= 0.0 )
+		not (OrderItem( amount <= 0.0 )) 
+		totalAmount : Number( doubleValue() > 0.0 ) from accumulate ( OrderItem( orderId == order.id , amount : amount),
+			init( double total = 0 ),
+			action( total += amount ),
+			reverse( total -= amount ),
+			result( total )
+) 
+	then
+		modify( order ) {
+				setAmount( totalAmount.doubleValue() )
+		}
+end

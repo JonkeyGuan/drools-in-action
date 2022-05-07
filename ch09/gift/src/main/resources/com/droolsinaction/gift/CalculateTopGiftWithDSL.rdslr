@@ -1,0 +1,12 @@
+package com.droolsinaction.gift;
+
+import java.lang.Number;
+
+rule "CalculateTopGiftWithDSL"
+	dialect "mvel"
+	agenda-group "dsl"
+	when
+		有一个客户, 如果它的积分大于或等于 1000 并且小于 2000
+	then
+		这个客户可以兑换的最高的礼品是 tanana吸管杯
+end

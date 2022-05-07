@@ -1,0 +1,7 @@
+"#",Scenario description,GIVEN,EXPECT,EXPECT,EXPECT
+"#",Scenario description,INSTANCE 10,GeneralInQueue,GeneralInQueue,GeneralInQueue
+"#",Scenario description,PROPERTY 10,general.name,general.pantsColor,general.position
+1,,,吕布,白色,1
+2,,,关羽,蓝色,2
+3,,,赵云,紫色,3
+4,,,张飞,黑色,4

@@ -1,0 +1,30 @@
+package com.droolsinaction.general;
+
+dialect "mvel"
+
+rule deduce
+    when
+        lvBu :     General( name == "吕布" )
+        guanYu :   General( name == "关羽", 
+                            position == 2 && != lvBu.position, 
+                            pantsColor != lvBu.pantsColor )
+
+        zhangFei : General( name == "张飞", 
+                            position != lvBu.position && != guanYu.position, 
+                            pantsColor == "黑色" && != lvBu.pantsColor && != guanYu.pantsColor )
+
+        zhaoYun :  General( name == "赵云",
+                            position not in (1, 4, lvBu.position,
+                            guanYu.position, zhangFei.position),
+                            pantsColor not in ("白色", "蓝色",
+                            lvBu.pantsColor, guanYu.pantsColor, zhangFei.pantsColor))
+
+                   General( position == (lvBu.getPosition() + 1), 
+                            pantsColor == "蓝色", 
+                            this in ( guanYu, zhangFei, zhaoYun ))
+    then
+        insert(new GeneralInQueue(lvBu));
+        insert(new GeneralInQueue(guanYu));
+        insert(new GeneralInQueue(zhangFei));
+        insert(new GeneralInQueue(zhaoYun));
+end

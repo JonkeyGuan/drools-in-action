@@ -1,0 +1,38 @@
+package com.droolsinaction.stock
+
+import java.math.BigDecimal
+
+global BigDecimal sellTolerance
+global BigDecimal buyTolerance
+
+declare Tick
+  @role(event)
+  @timestamp(timestamp)
+end
+
+rule "Sell"
+    when
+        $t:Tick($p1:price, $s:symbol) from entry-point "StockFeed"
+        Tick(this after[0s,30s] $t, $p2:price, $s == symbol) from entry-point "StockFeed"
+        eval($p1.subtract($p2).compareTo(sellTolerance) >= 0)
+    then
+        System.out.println("***提示*** >>> 股票 " + $s + " 建议卖出: " + $p1 + " => " + $p2);
+end
+
+rule "Buy"
+    when
+        $t:Tick($p1:price, $s:symbol) from entry-point "StockFeed"
+        Tick(this after[0s,15s] $t, $p2:price, $s == symbol) from entry-point "StockFeed"
+        eval($p2.subtract($p1).compareTo(buyTolerance) >= 0)
+    then
+        System.out.println("***提示*** >>> 股票 " + $s + " 建议买入: " + $p1 + " => " + $p2);
+end
+
+rule "High Volume Trading on AXX"
+    when
+        $v:Number(longValue > 300) from accumulate (
+            Tick($s:shares, symbol == "AXX") over window:time(30s) from entry-point "StockFeed"
+            , sum($s))
+    then
+        System.out.println("***提示*** >>> 股票 AXX 发生大宗交易，份额为: " + $v);
+end
